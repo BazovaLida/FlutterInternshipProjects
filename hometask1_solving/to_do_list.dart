@@ -2,8 +2,10 @@ import 'task.dart';
 
 class ToDoList {
   late final List<Task> _tasks;
+  // categorised version of the list (key: category, value: listed tasks of that category
   late Map<String, List<Task>> _categorised;
 
+  // constructor that can get initialised element or iterable collection of elements
   ToDoList({
     Task? element,
     Iterable<Task>? iterableElements,
@@ -27,6 +29,7 @@ class ToDoList {
     return _tasks.removeWhere((element) => element.id == id);
   }
 
+  // generation of categorised version. Saving and returning it
   Map generateCategorised() {
     _categorised = {};
 
@@ -41,6 +44,7 @@ class ToDoList {
     return _categorised;
   }
 
+  // returns formatted [_categorised].
   String categorisedToString() {
     final buffer = StringBuffer();
     var iterator = _categorised.entries.iterator;
