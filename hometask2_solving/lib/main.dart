@@ -1,56 +1,57 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(ContactsApp());
-}
+void main() => runApp(ContactsApp());
 
 class ContactsApp extends StatelessWidget {
-  // This widget is the root the application.
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
         title: "Contacts list",
         home: ContactsList(contacts: [
           Contact(
-              lastName: "Pichai",
-              firstName: "Sundar",
-              companyName: "Google LLC"),
+              name: "Sundar Pichai",
+              companyName: "Google LLC",
+              image: "avatars/SundarPichai.jpg"),
           Contact(
-              lastName: "Zuckerberg",
-              firstName: "Mark",
-              companyName: "Facebook Inc."),
+              name: "Mark Zuckerberg",
+              companyName: "Facebook Inc.",
+              image: "avatars/MarkZuckerberg.jpg"),
           Contact(
-              lastName: "Jassy",
-              firstName: "Andy",
-              companyName: "Amazon.com, Inc."),
+              name: "Andy Jassy",
+              companyName: "Amazon.com, Inc.",
+              image: "avatars/AndyJassy.jpg"),
           Contact(
-              lastName: "Nadella",
-              firstName: "Satya",
-              companyName: "Microsoft Corporation"),
+              name: "Satya Nadella",
+              companyName: "Microsoft Corporation",
+              image: "avatars/SatyaNadella.jpg"),
           Contact(
-              lastName: "Sarandos",
-              firstName: "Ted",
-              companyName: "Netflix, Inc."),
+              name: "Ted Sarandos",
+              companyName: "Netflix, Inc.",
+              image: "avatars/TedSarandos.jpg"),
           Contact(
-              lastName: "Musk", firstName: "Elon", companyName: "Tesla, Inc."),
+              name: "Elon Musk",
+              companyName: "Tesla, Inc.",
+              image: "avatars/ElonMusk.jpg"),
           Contact(
-              lastName: "Cook", firstName: "Tim", companyName: "Apple Inc."),
+              name: "Tim Cook",
+              companyName: "Apple Inc.",
+              image: "avatars/TimCook.jpg"),
           Contact(
-              lastName: "Shafirov",
-              firstName: "Maxim",
-              companyName: "JetBrains s.r.o."),
+              name: "Maxim Shafirov",
+              companyName: "JetBrains s.r.o.",
+              image: "avatars/MaximShafirov.jpg"),
           Contact(
-              lastName: "Friedman",
-              firstName: "Nat",
-              companyName: "GitHub, Inc."),
+              name: "Nat Friedman",
+              companyName: "GitHub, Inc.",
+              image: "avatars/NatFriedman.jpg"),
           Contact(
-              lastName: "Krishna",
-              firstName: "Arvind",
-              companyName: "International Business Machines Corporation"),
+              name: "Arvind Krishna",
+              companyName: "International Business Machines Corporation",
+              image: "avatars/ArvindKrishna.jpg"),
           Contact(
-              lastName: "Kim",
-              firstName: "Hyun Suk",
-              companyName: "Samsung Electronics Co., Ltd."),
+              name: "Hyun Suk Kim",
+              companyName: "Samsung Electronics Co., Ltd.",
+              image: "avatars/HyunSukKim.jpg"),
         ]));
   }
 }
@@ -67,34 +68,27 @@ class ContactsList extends StatefulWidget {
 class _ContactsListState extends State<ContactsList> {
   final Set<Contact> _starred = <Contact>{};
 
-  void _star(Contact contact, bool hasStar) {
-    // updates the visual appearance of the app.
+  void _tapStar(Contact contact, bool hasStar) {
+    // updates star presence and list starred contact
     setState(() {
       hasStar = !hasStar;
-
-      if (hasStar) {
-        _starred.add(contact);
-      } else {
-        _starred.remove(contact);
-      }
+      hasStar ? _starred.add(contact) : _starred.remove(contact);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // this.con
-
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        //todo How does it work??
         children: widget.contacts.map((Contact contact) {
           return ContactsListItem(
             contact: contact,
             hasStar: _starred.contains(contact),
-            onStarTapped: _star,
+            onStarTapped: _tapStar,
           );
         }).toList()
+        // Sorting list in alphabet order
           ..sort((a, b) => a.contact.lastName
               .toLowerCase()
               .compareTo(b.contact.lastName.toLowerCase())),
@@ -103,18 +97,20 @@ class _ContactsListState extends State<ContactsList> {
   }
 }
 
-//todo picture
 class Contact {
-  const Contact(
-      {required this.lastName, this.firstName = "", this.companyName = ""});
+  const Contact({required this.name, this.companyName = "", this.image = ""});
 
-  final String lastName;
-  final String firstName;
+  final String name;
   final String companyName;
+  final String image;
 
-  String get name => firstName + " " + lastName;
+  // returns last name if contact has not blank name
+  // or returns space holder if it's not
+  String get lastName =>
+      name.trim().isEmpty ? "_" : name.split(" ").last;
 }
 
+// definition of callback function
 typedef StarChangeCallback = Function(Contact contact, bool hasStar);
 
 class ContactsListItem extends StatelessWidget {
@@ -129,38 +125,76 @@ class ContactsListItem extends StatelessWidget {
   final bool hasStar;
   final StarChangeCallback onStarTapped;
 
+  // stores the first letter of the last name
+  static String lastNameChar = "_";
+
+  // decides weather [lastNameChar] should be inserted, or not
+  Widget navChar({required bool presence}) {
+    if (presence) {
+      lastNameChar = contact.lastName[0];
+      return Container(
+        padding: EdgeInsets.only(left: 32.0),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          lastNameChar,
+          style: myTextStyle(FontWeight.w100),
+        ),
+      );
+    }
+    return Container();
+  }
+
+  TextStyle myTextStyle([FontWeight weight = FontWeight.w300]) => TextStyle(
+        fontWeight: weight,
+        fontFamily: 'Montserrat',
+      );
+
+  // tap-able star icon widget. Calls [StarChangeCallback] on tap
+  Widget starIcon() => IconButton(
+        splashRadius: 20.0,
+        alignment: Alignment.center,
+        icon: Visibility(
+          visible: hasStar,
+          child: const Icon(Icons.star),
+        ),
+        color: Colors.lightBlueAccent,
+        onPressed: () {
+          onStarTapped(contact, hasStar);
+        },
+      );
+
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-        Container(
-          child: IconButton(
-            splashRadius: 20.0,
-            alignment: Alignment.center,
-            icon: Visibility(
-              visible: hasStar,
-              child: const Icon(Icons.star),
+    return Column(
+      children: <Widget>[
+        navChar(presence: lastNameChar != contact.lastName[0]),
+        ListTile(
+          leading: Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            starIcon(),
+            const SizedBox(
+              width: 8,
             ),
-            color: Theme.of(context).accentColor,
-            onPressed: () {
-              onStarTapped(contact, hasStar);
-            },
+            CircleAvatar(
+              backgroundImage: AssetImage(contact.image),
+            ),
+          ]),
+          title: Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Text(
+              contact.name,
+              style: myTextStyle(FontWeight.bold),
+            ),
           ),
-          margin: const EdgeInsets.only(right: 14),
+          subtitle: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: Text(
+              contact.companyName,
+              style: myTextStyle(),
+            ),
+          ),
         ),
-        CircleAvatar(
-          child: Text(contact.lastName[0]),
-        ),
-      ]),
-      title: Text(
-        contact.name,
-        // todo style: _getTextStyle(context),
-      ),
-      subtitle: Text(
-        contact.companyName,
-      ),
+      ],
     );
   }
 }
